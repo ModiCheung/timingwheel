@@ -27,6 +27,7 @@ public class TimerTaskList implements Delayed {
 
     /**
      * 设置过期时间
+     * jwt 设置expiration=expire，返回原来的expiration，并判断原来expiration和expire是否相同
      */
     public boolean setExpiration(long expire) {
         return expiration.getAndSet(expire) != expire;

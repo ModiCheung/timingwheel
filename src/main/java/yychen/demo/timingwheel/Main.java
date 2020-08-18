@@ -1,26 +1,29 @@
 package yychen.demo.timingwheel;
 
-import java.util.concurrent.CountDownLatch;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 public class Main {
-    static int executorCount = 0;
-    static int joinCount = 0;
 
-    public static void main(String[] args) throws InterruptedException {
-        CountDownLatch countDownLatch = new CountDownLatch(1000);
+    public static void main(String[] args) {
+        System.out.println("当前时间：" + LocalDateTime.now());
+        System.out.println("当前时间：" + LocalDateTime.now().toEpochSecond(ZoneOffset.ofHours(8)));
+        //jwt 开始轮询
         SystemTimer systemTimer = new SystemTimer();
-        for (int i = 1; i <= 1000; i++) {
-            TimerTask timerTask = new TimerTask(() -> {
-                countDownLatch.countDown();
-                executorCount++;
-                System.out.println(executorCount + "------------------ 开始执行");
-            }, i);
-            systemTimer.addTask(timerTask);
-            System.out.println(i + "---------------------------加入是时间轮");
-            joinCount++;
-        }
-        countDownLatch.await();
-        System.out.println("executorCount:-----------" + executorCount);
-        System.out.println("joinCount:-----------" + joinCount);
+
+        TimerTask timerTask1 = new TimerTask(new Thread(() -> {
+            System.out.println("10s后给A先生发信息,当前时间：" + LocalDateTime.now());
+        }), 10000);
+
+        TimerTask timerTask2 = new TimerTask(new Thread(() -> {
+            System.out.println("15s后给B先生发信息,当前时间：" + LocalDateTime.now());
+        }), 15000);
+        TimerTask timerTask3 = new TimerTask(new Thread(() -> {
+            System.out.println("5s后给C先生发信息,当前时间：" + LocalDateTime.now());
+        }), 5000);
+        systemTimer.addTask(timerTask2);
+        systemTimer.addTask(timerTask1);
+        systemTimer.addTask(timerTask3);
+
     }
 }

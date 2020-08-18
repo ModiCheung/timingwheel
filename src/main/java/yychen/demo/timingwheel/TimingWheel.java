@@ -51,7 +51,7 @@ public class TimingWheel {
         this.wheelSize = wheelSize;
         this.interval = tickMs * wheelSize;
         this.timerTaskLists = new TimerTaskList[wheelSize];
-        //currentTime为tickMs的整数倍 这里做取整操作
+        //jwt currentTime为tickMs的整数倍 这里做取整操作
         this.currentTime = currentTime - (currentTime % tickMs);
         this.delayQueue = delayQueue;
         for (int i = 0; i < wheelSize; i++) {
@@ -84,12 +84,13 @@ public class TimingWheel {
         } else if (expiration < currentTime + interval) {
             //当前时间轮可以容纳该任务 加入时间槽
             Long virtualId = expiration / tickMs;
+            //jwt 落到当前表盘的第几个槽，将timerTask加到对应的timerTaskList里面
             int index = (int) (virtualId % wheelSize);
-            System.out.println("tickMs:" + tickMs + "------index:" + index + "------expiration:" + expiration);
             TimerTaskList timerTaskList = timerTaskLists[index];
             timerTaskList.addTask(timerTask);
             if (timerTaskList.setExpiration(virtualId * tickMs)) {
                 //添加到delayQueue中
+                //jwt expiration更新，添加timerTaskList到delayQueue
                 delayQueue.offer(timerTaskList);
             }
         } else {

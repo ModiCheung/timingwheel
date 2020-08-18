@@ -32,13 +32,14 @@ public class SystemTimer {
      * 构造函数
      */
     public SystemTimer() {
-        timeWheel = new TimingWheel(1, 20, System.currentTimeMillis(), delayQueue);
+        timeWheel = new TimingWheel(1000, 60, System.currentTimeMillis(), delayQueue);
+        //jwt 固定大小线程池
         workerThreadPool = Executors.newFixedThreadPool(100);
         bossThreadPool = Executors.newFixedThreadPool(1);
         //20ms获取一次过期任务
         bossThreadPool.submit(() -> {
             while (true) {
-                this.advanceClock(20);
+                this.advanceClock(60000);
             }
         });
     }
@@ -47,7 +48,7 @@ public class SystemTimer {
      * 添加任务
      */
     public void addTask(TimerTask timerTask) {
-        //添加失败任务直接执行
+        //添加任务失败直接执行
         if (!timeWheel.addTask(timerTask)) {
             workerThreadPool.submit(timerTask.getTask());
         }
@@ -57,12 +58,14 @@ public class SystemTimer {
      * 获取过期任务
      */
     private void advanceClock(long timeout) {
+        //jwt 查询一个表盘返回内会过期的任务
         try {
             TimerTaskList timerTaskList = delayQueue.poll(timeout, TimeUnit.MILLISECONDS);
             if (timerTaskList != null) {
                 //推进时间
                 timeWheel.advanceClock(timerTaskList.getExpiration());
                 //执行过期任务（包含降级操作）
+                System.out.println("aaa");
                 timerTaskList.flush(this::addTask);
             }
         } catch (Exception e) {
